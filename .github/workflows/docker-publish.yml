@@ -79,4 +79,4 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
-          message: "🥳 New release: `${{ IMAGE_NAME }}:${{ steps.extract_version.outputs.version }}`"
+          message: "🥳 New release: `${{ github.repository }}:${{ steps.extract_version.outputs.version }}`"

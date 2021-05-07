@@ -58,7 +58,7 @@ jobs:
           VERSION=${{ steps.extract_version.outputs.version }}
           echo GITHUB_REF=$GITHUB_REF
           echo VERSION=$VERSION
-          docker build . --file Dockerfile --build-arg ACCESS_KEY_ID=$ACCESS_KEY_ID --build-arg SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY --build-arg BUCKET=$BUCKET --tag $IMAGE_NAME
+          docker build . --file Dockerfile --build-arg ACCESS_KEY_ID=${{ secrets.ACCESS_KEY_ID }} --build-arg SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }} --build-arg BUCKET=${{ secrets.BUCKET }} --tag $IMAGE_NAME
 
       - name: Log into registry
         run: echo "${{ secrets.PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -73,10 +73,10 @@ jobs:
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
 
-      - name: send release message
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          message: "🥳 New release: `${{ github.repository }}:${{ steps.extract_version.outputs.version }}`"
+      # - name: send release message
+      #   uses: appleboy/telegram-action@master
+      #   with:
+      #     to: ${{ secrets.TELEGRAM_TO }}
+      #     token: ${{ secrets.TELEGRAM_TOKEN }}
+      #     format: markdown
+      #     message: "🥳 New release: `${{ github.repository }}:${{ steps.extract_version.outputs.version }}`"

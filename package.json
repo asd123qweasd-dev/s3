@@ -1,0 +1,27 @@
+{
+  "name": "s3",
+  "version": "1.0.0",
+  "description": "s3 dnr.dev",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ACCESS_KEY_ID=ONoIaQ3DErU7GxgL_cey node --inspect .",
+    "start": "node .",
+    "build:docker": "docker build --build-arg ACCESS_KEY_ID=key --build-arg SECRET_ACCESS_KEY=token --build-arg BUCKET=bucket -t s3_dnr.dev ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/donetsk-dev/s3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/donetsk-dev/s3/issues"
+  },
+  "homepage": "https://github.com/donetsk-dev/s3#readme",
+  "dependencies": {
+    "dotenv": "^9.0.0",
+    "easy-yandex-s3": "^1.1.6",
+    "express": "^4.17.1",
+    "multer": "^1.4.2"
+  }
+}

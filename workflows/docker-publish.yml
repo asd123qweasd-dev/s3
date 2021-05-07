@@ -1,0 +1,82 @@
+name: Build S3 (docker)
+
+on:
+  push:
+    branches:
+      - master
+      - alpha
+    tags:
+      - v*
+  pull_request:
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+          if [ -f docker-compose.test.yml ]; then
+            docker-compose --file docker-compose.test.yml build
+            docker-compose --file docker-compose.test.yml run sut
+          else
+            docker build . --file Dockerfile
+          fi
+  push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Extract branch name
+        shell: bash
+        run: |
+          GITHUB_REF=$(echo ${GITHUB_REF#refs/heads/})
+          echo GITHUB_REF=$GITHUB_REF
+          echo "##[set-output name=branch;]$GITHUB_REF"
+        id: extract_branch
+
+      - name: Extract version
+        shell: bash
+        run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=latest
+          [ "$VERSION" == "alpha" ] && VERSION=alpha
+          echo VERSION=$VERSION
+          echo "##[set-output name=version;]$VERSION"
+        id: extract_version
+
+      - name: Build image
+        run: |
+          GITHUB_REF=${{ steps.extract_branch.outputs.branch }}
+          VERSION=${{ steps.extract_version.outputs.version }}
+          echo GITHUB_REF=$GITHUB_REF
+          echo VERSION=$VERSION
+          docker build . --file Dockerfile --build-arg ACCESS_KEY_ID=$ACCESS_KEY_ID --build-arg SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY --build-arg BUCKET=$BUCKET --tag $IMAGE_NAME
+
+      - name: Log into registry
+        run: echo "${{ secrets.PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=${{ steps.extract_version.outputs.version }}
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
+      - name: send release message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: "🥳 New release: `${{ IMAGE_NAME }}:${{ steps.extract_version.outputs.version }}`"

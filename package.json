@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/donetsk-dev/s3#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^9.0.0",
     "easy-yandex-s3": "^1.1.6",
     "express": "^4.17.1",

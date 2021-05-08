@@ -2,6 +2,7 @@ version: "3.6"
 
 services:
   client:
-    image: s3_dnr.dev
+    # image: s3_dnr.dev
+    image: ghcr.io/donetsk-dev/s3:latest
     ports:
       - 3002:3002

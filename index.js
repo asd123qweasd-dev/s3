@@ -1,14 +1,15 @@
 require('dotenv').config()
-var express = require("express")
-var app = express()
+const express = require("express")
+const app = express()
+const cors = require('cors')
 
-var multer = require("multer")
-var EasyYandexS3 = require("easy-yandex-s3")
+const multer = require("multer")
+const EasyYandexS3 = require("easy-yandex-s3")
 
 const { ACCESS_KEY_ID, SECRET_ACCESS_KEY, BUCKET } = process.env
 const PORT = process.env.PORT || 3002
 
-var s3 = new EasyYandexS3({
+const s3 = new EasyYandexS3({
   auth: {
     accessKeyId: ACCESS_KEY_ID,
     secretAccessKey: SECRET_ACCESS_KEY,
@@ -16,6 +17,8 @@ var s3 = new EasyYandexS3({
   Bucket: BUCKET,
   debug: false
 })
+
+app.use(cors())
 
 app.use(multer().any())
 
